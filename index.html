@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="css/app.css">
+  </head>
+  <body>
+    <form class="main-form">
+      <div class="form-group">
+        <label>First name</label><input class="form-control" data-slide="first-name">
+      </div>
+      <div class="form-group">
+        <label>Last name</label><input class="form-control" data-slide="last-name">
+      </div>
+      <div class="form-group">
+        <label>Email</label><input class="form-control" data-slide="email">
+      </div>
+      <button type="submit" class="btn btn-default">Submit</button>
+      <button id="fill-with-slide" type="button" class="btn btn-primary">Fill with slide</button>
+    </form>
+
+    <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/slide-0.0.1.js"></script>
+    <script type="text/javascript">
+      $('#fill-with-slide').on('click', function () {
+        var form = $(this).parent('form');
+        Slide.createBucketFromForm(form, function (bucket) {
+          bucket.prompt(function (data) {
+            Slide.populateFields(form, data);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
