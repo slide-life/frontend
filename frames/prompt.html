@@ -1,11 +1,12 @@
 <html>
   <body>
+    <label>Username: </label><input id="username">
     <button type="button" id="send-to-app">Send to app</button>
     <hr>
     <button type="button">Log in</button>
     <button type="button">Create account</button>
 
-    <script type="text/javascript" src="../jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="jquery-2.1.1.min.js"></script>
     <script type="text/javascript">
       function getParameterByName(name) {
         name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
@@ -19,11 +20,10 @@
         var bucket = getParameterByName('bucket');
         $.ajax({
           type: 'PUT',
-          url: 'http://slide-dev.ngrok.com/buckets/' + bucket,
+          url: 'http://slide-dev.ngrok.com/buckets/' + bucket + '/request_content',
           contentType: 'application/json',
           data: JSON.stringify({
-            'first-name': 'Jack',
-            'last-name': 'Dent',
+            'user': $('#username').val()
           })
         });
       });
