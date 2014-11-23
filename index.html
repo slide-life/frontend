@@ -21,12 +21,13 @@
     <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
     <script type="text/javascript" src="js/bootstrap.js"></script>
     <script type="text/javascript" src="js/slide-0.0.1.js"></script>
+    <script type="text/javascript" src="js/sjcl.js"></script>
     <script type="text/javascript">
       $('#fill-with-slide').on('click', function () {
         var form = $(this).parent('form');
-        Slide.createBucketFromForm(form, function (bucket) {
-          bucket.prompt(function (data) {
-            Slide.populateFields(form, data);
+        Slide.createBucketFromForm(form, function (bucket, keys) {
+          bucket.prompt(function (data, cipherkey) {
+            Slide.populateFields(form, data, cipherkey, keys.sec);
           });
         });
       });

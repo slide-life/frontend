@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="css/app.css">
+  </head>
+  <body>
+
+    <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="js/sjcl.js"></script>
+    <script type="text/javascript" src="js/slide-crypto.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            slide.crypto.generateKeys(384, '', function(keys, carry) {
+                alert(keys.pub);
+                alert(keys.sec);
+            }, null, 0);
+        });
+    </script>
+  </body>
+</html>
