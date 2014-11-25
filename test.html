@@ -1,18 +1,25 @@
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="css/app.css">
   </head>
   <body>
 
-    <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
-    <script type="text/javascript" src="js/sjcl.js"></script>
-    <script type="text/javascript" src="js/slide-crypto.js"></script>
+    <script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
+    <script type="text/javascript" src="bower_components/sjcl/sjcl.js"></script>
+    <script type="text/javascript" src="bower_components/slide.js/dist/slide.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
             slide.crypto.generateKeys(384, '', function(keys, carry) {
                 alert(keys.pub);
                 alert(keys.sec);
+                debugger;
+                slide.crypto.encryptString("test this", keys.pub, function(result, carry) {
+                    alert("Result enckey: " + result.enckey);
+                    alert("Result: " + result.ciphertext);
+                    slide.crypto.decryptString(result.ciphertext, result.enckey, keys.sec, function(clear, carry) {
+                        alert(clear);
+                    }, null);
+                }, null);
             }, null, 0);
         });
     </script>
