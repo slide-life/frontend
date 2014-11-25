@@ -14,6 +14,7 @@
     "tests"
   ],
   "dependencies": {
-    "slide": "https://github.com/slide-life/slide.js"
+    "slide.js": "git@github.com:slide-life/slide.js.git",
+    "bootstrap": "~3.3.1"
   }
 }
