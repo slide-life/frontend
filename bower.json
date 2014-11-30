@@ -14,6 +14,7 @@
     "tests"
   ],
   "dependencies": {
+    "sjcl": "git@github.com:slide-life/sjcl.git",
     "slide.js": "git@github.com:slide-life/slide.js.git",
     "bootstrap": "~3.3.1"
   }
