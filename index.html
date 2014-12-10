@@ -27,8 +27,8 @@
         var blocks = Slide.extractBlocks(form);
         var channel = new Slide.Channel(blocks);
         channel.create(function () {
-          channel.prompt(function (data) {
-            Slide.populateFields(form, data.fields, channel.privateKey);
+          channel.prompt(function (fields) {
+            Slide.populateFields(form, fields);
           });
         });
       });
