@@ -16,14 +16,13 @@
       }
 
       $('#send-to-app').on('click', function () {
-        // Simulate AJAX request to push notification with bucket id
-        var bucket = getParameterByName('bucket');
+        var channel = getParameterByName('channel');
         $.ajax({
           type: 'PUT',
-          url: 'http://slide-dev.ngrok.com/buckets/' + bucket + '/request_content',
+          url: 'http://api-sandbox.slide.life/channels/' + channel + '/request_content',
           contentType: 'application/json',
           data: JSON.stringify({
-            'user': $('#username').val()
+            number: $('#username').val()
           })
         });
       });

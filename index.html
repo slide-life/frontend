@@ -24,9 +24,11 @@
     <script type="text/javascript">
       $('#fill-with-slide').on('click', function () {
         var form = $(this).parent('form');
-        Slide.createBucketFromForm(form, function (bucket, keys) {
-          bucket.prompt(function (data, cipherkey) {
-            Slide.populateFields(form, data, cipherkey, keys.sec);
+        var blocks = Slide.extractBlocks(form);
+        var channel = new Slide.Channel(blocks);
+        channel.create(function () {
+          channel.prompt(function (data) {
+            Slide.populateFields(form, data.fields, channel.privateKey);
           });
         });
       });
