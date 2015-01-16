@@ -17,12 +17,13 @@
 
       $('#send-to-app').on('click', function () {
         var channel = getParameterByName('channel');
+        var number = getParameterByName('number');
         $.ajax({
           type: 'PUT',
           url: 'http://api-sandbox.slide.life/channels/' + channel + '/request_content',
           contentType: 'application/json',
           data: JSON.stringify({
-            number: $('#username').val()
+            number: number
           })
         });
       });
