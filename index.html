@@ -59,7 +59,11 @@
         var form = $(this).parent('form');
         var blocks = Slide.extractBlocks(form);
         Slide.User.prompt(function(number, key) {
-          actor.openRequest(blocks, number, key, function(fields) {
+          actor.openRequest(blocks, {
+            downstream: number,
+            key: key,
+            type: 'user'
+          }, function(fields) {
             Slide.populateFields(form, fields);
           });
         });
