@@ -49,10 +49,12 @@
       <button type="submit" class="btn btn-default">Submit</button>
       <button id="fill-with-slide" type="button" class="btn btn-default">Fill with slide</button>
     </form>
+    <div id="modal" class="modal"><div class="modal-body"></div></div>
 
     <script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
     <script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
-    <script type="text/javascript" src="bower_components/slide.js/dist/slide.js"></script>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+    <script type="text/javascript" src="/slide.js/dist/js/slide.js"></script>
     <script type="text/javascript">
       var actor = new Slide.Actor();
       $('#fill-with-slide').on('click', function () {
