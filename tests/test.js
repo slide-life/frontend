@@ -8,11 +8,35 @@ function loadUser(cb) {
   }, cb);
 }
 
+function loadVendor(cb) {
+  Slide.Vendor.load(function(next) {
+    Slide.Vendor.invite("Admin", function(vendor) {
+      vendor.register(function(vendor) {
+        vendor.persist();
+        next(vendor);
+      });
+    });
+  }, cb);
+}
+
+function createVendorForm(vendor, cb) {
+  vendor.createForm("Form " + Math.floor(Math.random()*1000), ['first-name'], function(form) {
+    console.log("form", form);
+  });
+}
+
+loadVendor(function(vendor) {
+  createVendorForm(vendor, function(form) {
+    console.log(form);
+  });
+});
+
 // Test loadUser
 loadUser(function(user) {
-  console.log(user);
   user.getProfile(function(profile) {
-    console.log(profile);
+    user.patchProfile(profile, function(patch) {
+      console.log("patched", patch);
+    });
   });
 });
 
@@ -30,7 +54,6 @@ function actorUserRequest(fields, user) {
 function listenUser(msg, cb) {
   loadUser(function(user) {
     user.listen(function(msg) {
-      console.log("user notif");
       cb(msg);
     });
     actorUserRequest(msg, user);
