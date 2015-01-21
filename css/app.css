@@ -7,10 +7,3 @@ body {
   width: 300px;
   margin: 60px auto;
 }
-
-iframe {
-  outline: none;
-  border: none;
-  width: 100%;
-}
-
