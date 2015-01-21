@@ -20,13 +20,13 @@ function loadVendor(cb) {
 }
 
 function createVendorForm(name, vendor, cb) {
-  vendor.createForm(name, ['first-name'], function(form) {
+  vendor.createForm(name, ['bank.card'], function(form) {
     cb(form);
   });
 }
 
 function actorUserRequest(fields, user) {
-  new Slide.Actor(location.origin).openRequest(['first-name'], {
+  new Slide.Actor(location.origin).openRequest(['bank.card'], {
     downstream: user.number,
     key: user.publicKey,
     type: 'user'
@@ -40,9 +40,7 @@ function userFormPost(form, user) {
     type: 'user', downstream: user.number,
     key: user.publicKey
   }, function(conversation) {
-    conversation.submit(user.uuid, {
-      'first-name': 'Matt'
-    });
+    // Respond?
   }, user.symmetricKey);
 }
 
@@ -55,27 +53,31 @@ function listenUser(msg, cb) {
   });
 }
 
-listenUser(['first-name'], function(msg) {
-  console.log("assert", ['first-name'], msg);
+listenUser(['bank.card'], function(msg) {
+  console.log("assert", ['bank.card'], msg);
 });
 
 function showModal(userData) {
   Slide.presentModalFormFromIdentifiers(['bank.card', 'name','drivers-license'], userData);
 }
 
+/*
 loadUser(function(user) {
   user.getProfile(function(profile) {
     // showModal(profile);
-    user.patchProfile(profile, function(patch) {
+    user.patchProfile(serializePatch(profile), function(patch) {
       console.log("assert", profile, patch);
     });
   });
 });
+*/
 
 function showForms(forms, user) {
   Slide.presentFormsModal(forms, user, function(form, data) {
     form.remove();
-    console.log(data);
+    user.patchProfile(Slide.User.serializeProfile(data), function(patch) {
+      console.log("patch", patch);
+    });
   });
 }
 
@@ -86,7 +88,8 @@ loadVendor(function(vendor) {
   });
   loadUser(function(user) {
     user.getProfile(function(profile) {
-      user.profile = profile;
+      user.profile = Slide.User.deserializeProfile(profile);
+      console.log("profile", profile);
       // TODO: vendor user should be persisted
       Slide.VendorUser.createRelationship(user, vendor, function(vendorUser) {
         vendorUser.loadVendorForms(function(forms) {
@@ -96,7 +99,7 @@ loadVendor(function(vendor) {
             form.name = name;
             return form;
           });
-          console.log("assert", form.fields, ['first-name']);
+          console.log("assert", form.fields, ['bank.card']);
           showForms(forms, user);
           user.uuid = vendorUser.uuid;
           userFormPost(form, user);
