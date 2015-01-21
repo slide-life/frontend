@@ -21,36 +21,18 @@ function loadVendor(cb) {
 
 function createVendorForm(vendor, cb) {
   vendor.createForm("Form " + Math.floor(Math.random()*1000), ['first-name'], function(form) {
-    console.log("form", form);
+    cb(form);
   });
 }
-
-loadVendor(function(vendor) {
-  createVendorForm(vendor, function(form) {
-    console.log(form);
-  });
-});
-
-// Test loadUser
-loadUser(function(user) {
-  user.getProfile(function(profile) {
-    user.patchProfile(profile, function(patch) {
-      console.log("patched", patch);
-    });
-  });
-});
 
 function actorUserRequest(fields, user) {
   new Slide.Actor(location.origin).openRequest(['first-name'], {
     downstream: user.number,
     key: user.publicKey,
     type: 'user'
-  }, function(submission) {
-    console.log("submission", submission);
   });
 }
 
-// Receive notifications for users
 function listenUser(msg, cb) {
   loadUser(function(user) {
     user.listen(function(msg) {
@@ -60,8 +42,21 @@ function listenUser(msg, cb) {
   });
 }
 
-// Run tests
 listenUser(['first-name'], function(msg) {
-  console.log(msg);
+  console.log("assert", ['first-name'], msg);
+});
+
+loadUser(function(user) {
+  user.getProfile(function(profile) {
+    user.patchProfile(profile, function(patch) {
+      console.log("assert", profile, patch);
+    });
+  });
+});
+
+loadVendor(function(vendor) {
+  createVendorForm(vendor, function(form) {
+    console.log("form", "Form 528", form);
+  });
 });
 
