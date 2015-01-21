@@ -20,29 +20,28 @@ function loadVendor(cb) {
 }
 
 function createVendorForm(name, vendor, cb) {
-  vendor.createForm(name, ['first-name'], function(form) {
+  vendor.createForm(name, ['bank.card'], function(form) {
     cb(form);
   });
 }
 
 function actorUserRequest(fields, user) {
-  new Slide.Actor(location.origin).openRequest(['first-name'], {
+  new Slide.Actor(location.origin).openRequest(['bank.card'], {
     downstream: user.number,
     key: user.publicKey,
     type: 'user'
   });
 }
 
-function userFormPost(form, user) {
+function userFormPost(form, user, data) {
   new Slide.Conversation({
     type: 'form', upstream: form.id
   }, {
     type: 'user', downstream: user.number,
     key: user.publicKey
   }, function(conversation) {
-    conversation.submit(user.uuid, {
-      'first-name': 'Matt'
-    });
+    // Respond?
+    conversation.submit(user.uuid, data);
   }, user.symmetricKey);
 }
 
@@ -55,54 +54,74 @@ function listenUser(msg, cb) {
   });
 }
 
-listenUser(['first-name'], function(msg) {
-  console.log("assert", ['first-name'], msg);
+listenUser(['bank.card'], function(msg) {
+  console.log("assert", ['bank.card'], msg);
 });
 
 function showModal(userData) {
   Slide.presentModalFormFromIdentifiers(['bank.card', 'name','drivers-license'], userData);
 }
 
+/*
 loadUser(function(user) {
   user.getProfile(function(profile) {
     // showModal(profile);
-    user.patchProfile(profile, function(patch) {
+    user.patchProfile(serializePatch(profile), function(patch) {
       console.log("assert", profile, patch);
     });
   });
 });
+*/
 
 function showForms(forms, user) {
-  Slide.presentFormsModal(forms, user, function(form, data) {
+  Slide.presentFormsModal(forms, user, function(vendorForm, form, profile, patch) {
     form.remove();
+    /*user.patchProfile(Slide.User.serializeProfile(data), function(patch) {
+      console.log("patch", patch);
+    });*/
+    var data = Slide.User.serializeProfile(profile);
     console.log(data);
+    userFormPost(vendorForm, user, data);
   });
 }
 
-loadVendor(function(vendor) {
-  var name = "Form" + Math.floor(Math.random()*1e8);
-  createVendorForm(name, vendor, function(form) {
-    console.log("assert", name, form.name);
-  });
-  loadUser(function(user) {
-    user.getProfile(function(profile) {
-      user.profile = profile;
-      // TODO: vendor user should be persisted
-      Slide.VendorUser.createRelationship(user, vendor, function(vendorUser) {
-        vendorUser.loadVendorForms(function(forms) {
-          var form = forms[name];
-          forms = Object.keys(forms).map(function(name) {
-            var form = forms[name];
-            form.name = name;
-            return form;
+function configurePage(isVendor) {
+  loadVendor(function(vendor) {
+    if( !isVendor ) {
+      loadUser(function(user) {
+        user.getProfile(function(profile) {
+          user.profile = Slide.User.deserializeProfile(profile);
+          console.log("profile", profile);
+          // TODO: vendor user should be persisted
+          Slide.VendorUser.createRelationship(user, vendor, function(vendorUser) {
+            vendorUser.loadVendorForms(function(forms) {
+              forms = Object.keys(forms).map(function(name) {
+                var form = forms[name];
+                form.name = name;
+                return form;
+              });
+              user.uuid = vendorUser.uuid;
+              showForms(forms, user);
+              // userFormPost(form, user);
+            });
           });
-          console.log("assert", form.fields, ['first-name']);
-          showForms(forms, user);
-          user.uuid = vendorUser.uuid;
-          userFormPost(form, user);
         });
       });
-    });
+    } else {
+      function formSelection(form) {
+        Slide.VendorForm.get(vendor, form.id, function(fields) {
+          console.log(fields);
+        });
+      }
+      function createForm() {
+        createVendorForm("New"+Math.floor(Math.random()*1000), vendor, function(form) {
+          Slide.insertVendorForm(form, vendor, formSelection)
+        }, formSelection);
+      }
+      vendor.loadForms(function(forms) {
+        Slide.presentVendorForms(forms, vendor, createForm, formSelection);
+      });
+    }
   });
-});
+}
 
