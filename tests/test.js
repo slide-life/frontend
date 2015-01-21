@@ -19,8 +19,8 @@ function loadVendor(cb) {
   }, cb);
 }
 
-function createVendorForm(vendor, cb) {
-  vendor.createForm("Form " + Math.floor(Math.random()*1000), ['first-name'], function(form) {
+function createVendorForm(name, vendor, cb) {
+  vendor.createForm(name, ['first-name'], function(form) {
     cb(form);
   });
 }
@@ -55,8 +55,9 @@ loadUser(function(user) {
 });
 
 loadVendor(function(vendor) {
-  createVendorForm(vendor, function(form) {
-    console.log("form", "Form 528", form);
+  var name = "Form" + Math.floor(Math.random()*1e8);
+  createVendorForm(name, vendor, function(form) {
+    console.log("form", name, form.name);
   });
 });
 
