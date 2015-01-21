@@ -33,7 +33,7 @@ function actorUserRequest(fields, user) {
   });
 }
 
-function userFormPost(form, user) {
+function userFormPost(form, user, data) {
   new Slide.Conversation({
     type: 'form', upstream: form.id
   }, {
@@ -41,6 +41,7 @@ function userFormPost(form, user) {
     key: user.publicKey
   }, function(conversation) {
     // Respond?
+    conversation.submit(user.uuid, data);
   }, user.symmetricKey);
 }
 
@@ -73,39 +74,54 @@ loadUser(function(user) {
 */
 
 function showForms(forms, user) {
-  Slide.presentFormsModal(forms, user, function(form, data) {
+  Slide.presentFormsModal(forms, user, function(vendorForm, form, profile, patch) {
     form.remove();
-    user.patchProfile(Slide.User.serializeProfile(data), function(patch) {
+    /*user.patchProfile(Slide.User.serializeProfile(data), function(patch) {
       console.log("patch", patch);
-    });
+    });*/
+    var data = Slide.User.serializeProfile(profile);
+    console.log(data);
+    userFormPost(vendorForm, user, data);
   });
 }
 
-loadVendor(function(vendor) {
-  var name = "Form" + Math.floor(Math.random()*1e8);
-  createVendorForm(name, vendor, function(form) {
-    console.log("assert", name, form.name);
-  });
-  loadUser(function(user) {
-    user.getProfile(function(profile) {
-      user.profile = Slide.User.deserializeProfile(profile);
-      console.log("profile", profile);
-      // TODO: vendor user should be persisted
-      Slide.VendorUser.createRelationship(user, vendor, function(vendorUser) {
-        vendorUser.loadVendorForms(function(forms) {
-          var form = forms[name];
-          forms = Object.keys(forms).map(function(name) {
-            var form = forms[name];
-            form.name = name;
-            return form;
+function configurePage(isVendor) {
+  loadVendor(function(vendor) {
+    if( !isVendor ) {
+      loadUser(function(user) {
+        user.getProfile(function(profile) {
+          user.profile = Slide.User.deserializeProfile(profile);
+          console.log("profile", profile);
+          // TODO: vendor user should be persisted
+          Slide.VendorUser.createRelationship(user, vendor, function(vendorUser) {
+            vendorUser.loadVendorForms(function(forms) {
+              forms = Object.keys(forms).map(function(name) {
+                var form = forms[name];
+                form.name = name;
+                return form;
+              });
+              user.uuid = vendorUser.uuid;
+              showForms(forms, user);
+              // userFormPost(form, user);
+            });
           });
-          console.log("assert", form.fields, ['bank.card']);
-          showForms(forms, user);
-          user.uuid = vendorUser.uuid;
-          userFormPost(form, user);
         });
       });
-    });
+    } else {
+      function formSelection(form) {
+        Slide.VendorForm.get(vendor, form.id, function(fields) {
+          console.log(fields);
+        });
+      }
+      function createForm() {
+        createVendorForm("New"+Math.floor(Math.random()*1000), vendor, function(form) {
+          Slide.insertVendorForm(form, vendor, formSelection)
+        }, formSelection);
+      }
+      vendor.loadForms(function(forms) {
+        Slide.presentVendorForms(forms, vendor, createForm, formSelection);
+      });
+    }
   });
-});
+}
 
