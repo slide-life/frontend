@@ -33,6 +33,19 @@ function actorUserRequest(fields, user) {
   });
 }
 
+function userFormPost(form, user) {
+  new Slide.Conversation({
+    type: 'form', upstream: form.id
+  }, {
+    type: 'user', downstream: user.number,
+    key: user.publicKey
+  }, function(conversation) {
+    conversation.submit(user.uuid, {
+      'first-name': 'Matt'
+    });
+  }, user.symmetricKey);
+}
+
 function listenUser(msg, cb) {
   loadUser(function(user) {
     user.listen(function(msg) {
@@ -62,7 +75,10 @@ loadVendor(function(vendor) {
   loadUser(function(user) {
     Slide.VendorUser.createRelationship(user, vendor, function(vendorUser) {
       vendorUser.loadVendorForms(function(forms) {
-        console.log("assert", forms[name].fields, ['first-name']);
+        var form = forms[name];
+        console.log("assert", form.fields, ['first-name']);
+        user.uuid = vendorUser.uuid;
+        userFormPost(form, user);
       });
     });
   });
