@@ -59,13 +59,25 @@ listenUser(['first-name'], function(msg) {
   console.log("assert", ['first-name'], msg);
 });
 
+function showModal(userData) {
+  Slide.presentModalFormFromIdentifiers(['bank.card', 'name','drivers-license'], userData);
+}
+
 loadUser(function(user) {
   user.getProfile(function(profile) {
+    // showModal(profile);
     user.patchProfile(profile, function(patch) {
       console.log("assert", profile, patch);
     });
   });
 });
+
+function showForms(forms, user) {
+  Slide.presentFormsModal(forms, user, function(form, data) {
+    form.remove();
+    console.log(data);
+  });
+}
 
 loadVendor(function(vendor) {
   var name = "Form" + Math.floor(Math.random()*1e8);
@@ -73,50 +85,24 @@ loadVendor(function(vendor) {
     console.log("assert", name, form.name);
   });
   loadUser(function(user) {
-    Slide.VendorUser.createRelationship(user, vendor, function(vendorUser) {
-      vendorUser.loadVendorForms(function(forms) {
-        var form = forms[name];
-        console.log("assert", form.fields, ['first-name']);
-        user.uuid = vendorUser.uuid;
-        userFormPost(form, user);
+    user.getProfile(function(profile) {
+      user.profile = profile;
+      // TODO: vendor user should be persisted
+      Slide.VendorUser.createRelationship(user, vendor, function(vendorUser) {
+        vendorUser.loadVendorForms(function(forms) {
+          var form = forms[name];
+          forms = Object.keys(forms).map(function(name) {
+            var form = forms[name];
+            form.name = name;
+            return form;
+          });
+          console.log("assert", form.fields, ['first-name']);
+          showForms(forms, user);
+          user.uuid = vendorUser.uuid;
+          userFormPost(form, user);
+        });
       });
     });
   });
 });
 
-var userData = {
-  "slide.life:name": [
-    {
-      "slide.life:name.first": "John",
-      "slide.life:name.middle": "",
-      "slide.life:name.last": "Doe"
-    }
-  ],
-  "slide.life:bank.card": [
-    {
-      "slide.life:bank.card.number": "4351435253459",
-      "slide.life:bank.card.security-code": "439",
-      "slide.life:bank.card.start-date": "01- 03",
-      "slide.life:bank.card.expiry-date": "11-01"
-    },
-    {
-      "slide.life:bank.card.number": "12312312123",
-      "slide.life:bank.card.security-code": "151",
-      "slide.life:bank.card.start-date": "05-11",
-      "slide.life:bank.card.expiry-date": "12-15"
-    }
-  ],
-  "slide.life:drivers-license.number": [
-    "137583281",
-    "452"
-  ],
-  "slide.life:drivers-license.start-date": [
-    "01-13"
-  ],
-  "slide.life:drivers-license.expiry-date": [
-    "12-15",
-    "11-18"
-  ]
-};
-
-Slide.presentModalFormFromIdentifiers(['bank.card', 'name','drivers-license'], userData);
