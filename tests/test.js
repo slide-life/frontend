@@ -57,7 +57,14 @@ loadUser(function(user) {
 loadVendor(function(vendor) {
   var name = "Form" + Math.floor(Math.random()*1e8);
   createVendorForm(name, vendor, function(form) {
-    console.log("form", name, form.name);
+    console.log("assert", name, form.name);
+  });
+  loadUser(function(user) {
+    Slide.VendorUser.createRelationship(user, vendor, function(vendorUser) {
+      vendorUser.loadVendorForms(function(forms) {
+        console.log("assert", forms[name].fields, ['first-name']);
+      });
+    });
   });
 });
 
