@@ -93,7 +93,11 @@ function configurePage(isVendor) {
           user.profile = Slide.User.deserializeProfile(profile);
           console.log("profile", profile);
           // TODO: vendor user should be persisted
-          Slide.VendorUser.createRelationship(user, vendor, function(vendorUser) {
+          Slide.VendorUser.load(function(next) {
+            Slide.VendorUser.createRelationship(user, vendor, function(vendorUser) {
+              next(vendorUser);
+            });
+          }, function(vendorUser) {
             vendorUser.loadVendorForms(function(forms) {
               forms = Object.keys(forms).map(function(name) {
                 var form = forms[name];
@@ -101,6 +105,7 @@ function configurePage(isVendor) {
                 return form;
               });
               user.uuid = vendorUser.uuid;
+              console.log("sym", user.symmetricKey);
               showForms(forms, user);
               // userFormPost(form, user);
             });
@@ -110,7 +115,13 @@ function configurePage(isVendor) {
     } else {
       function formSelection(form) {
         Slide.VendorForm.get(vendor, form.id, function(fields) {
-          console.log(fields);
+          for( var uuid in fields.responses ) {
+            new Slide.VendorUser(uuid).load(function(vendorUser) {
+              var key = vendorUser.getVendorKey(vendor.privateKey);
+              var data = Slide.crypto.AES.decryptData(fields.responses[uuid], key);
+              console.log(data);
+            });
+          }
         });
       }
       function createForm() {
